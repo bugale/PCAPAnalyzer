@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 						bitssent[destUDPport][pid] += 1504;
 						if (firstmsec[destUDPport][pid] == -1) pids++;
 						if (firstmsec[destUDPport][pid] == -1) firstmsec[destUDPport][pid] = time;
-						else lastmsec[destUDPport][pid] = time;
+						else if(firstmsec[destUDPport][pid] != time) lastmsec[destUDPport][pid] = time;
 
                         if ((pkt_data[cur + 1] & 0x80) != 0x80 && pid >= 0 && pid < 8192) //No corruption
                         {
@@ -196,7 +196,7 @@ int main(int argc, char **argv)
                                         firstPCRs[destUDPport][pid] = PCR;
                                         firstPCRsmsec[destUDPport][pid] = time;
                                     }
-                                    else
+                                    else if (firstPCRs[destUDPport][pid] != time)
                                     {
                                         lastPCRs[destUDPport][pid] = PCR;
                                         lastPCRsmsec[destUDPport][pid] = time;
