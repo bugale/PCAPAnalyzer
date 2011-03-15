@@ -79,6 +79,8 @@ int main(int argc, char **argv)
 	int udpports = 0;
 	int pids = 0;
 	int pcrpids = 0;
+	int pids2 = 0;
+	int pcrpids2 = 0;
 	
 	time_start = gettimeofday();
 	long long* lastUDPsmsec   = (long long*)malloc(65536 * sizeof(long long)); //The time when the last packet with had arrived for each UDP Port
@@ -117,7 +119,7 @@ int main(int argc, char **argv)
 	{
 		packets++;
 		int cur = 12; //skip MAC Adreeses
-		int len = header->caplen;
+		int len = header->caplen - 4;
 		long long time = ((long long)header->ts.tv_sec) * 1000000 + (long long)header->ts.tv_usec;
 		if (len > 14 && pkt_data[cur] == 0x08 && pkt_data[cur + 1] == 0x00 && ((pkt_data[cur + 2] & 0xf0) == 0x40)) //If IP Packet
 		{
@@ -172,7 +174,7 @@ int main(int argc, char **argv)
 						bitssent[destUDPport][pid] += 1504;
 						if (firstmsec[destUDPport][pid] == -1) pids++;
 						if (firstmsec[destUDPport][pid] == -1) firstmsec[destUDPport][pid] = time;
-						else if(firstmsec[destUDPport][pid] != time) lastmsec[destUDPport][pid] = time;
+						else if(firstmsec[destUDPport][pid] != time) { lastmsec[destUDPport][pid] = time; pids2++; }
 
                         if ((pkt_data[cur + 1] & 0x80) != 0x80 && pid >= 0 && pid < 8192) //No corruption
                         {
@@ -198,6 +200,7 @@ int main(int argc, char **argv)
                                     }
                                     else if (firstPCRs[destUDPport][pid] != time)
                                     {
+										pcrpids2++;
                                         lastPCRs[destUDPport][pid] = PCR;
                                         lastPCRsmsec[destUDPport][pid] = time;
                                     }
@@ -261,6 +264,13 @@ int main(int argc, char **argv)
 							fprintf(pFile, "Bitrate: %15.3f  bps\n", bitrate);
 						fprintf(pFile, "\n");
 					}
+					else if (firstmsec[j][i] != -1)
+					{
+						fprintf(pFile, "Port Dec: %4d\n", j);
+						fprintf(pFile, "PID  Hex: %4x\n", i);
+						fprintf(pFile, "Only one packet with this Port and PID was processed!\n", i);
+						fprintf(pFile, "\n");
+					}
 		fclose (pFile);
 
 		pFile = fopen ("UDP-Jitter.txt","w");
@@ -285,16 +295,18 @@ int main(int argc, char **argv)
 		fclose (pFile);
 
 		pFile = fopen ("Statistics.txt","w");
-		fprintf(pFile, "Ethernet packets processed:               %9d\n", packets);
-		fprintf(pFile, "IPv4 packets processed:                   %9d\n", ippackets);
-		fprintf(pFile, "packets with a Transport Stream processed:%9d\n", transportstreams);
+		fprintf(pFile, "Ethernet packets processed:                            %9d\n", packets);
+		fprintf(pFile, "IPv4 packets processed:                                %9d\n", ippackets);
+		fprintf(pFile, "packets with a Transport Stream processed:             %9d\n", transportstreams);
 		fprintf(pFile, "\n");
-		fprintf(pFile, "Transport Stream packets processed:       %9d\n", tspackets);
-		fprintf(pFile, "packets with PCR processed:               %9d\n", pcrpackets);
+		fprintf(pFile, "Transport Stream packets processed:                    %9d\n", tspackets);
+		fprintf(pFile, "packets with PCR processed:                            %9d\n", pcrpackets);
 		fprintf(pFile, "\n");
-		fprintf(pFile, "Number of PIDs processed:                 %9d\n", pids);
-		fprintf(pFile, "Number of PIDs with PCR processed:        %9d\n", pcrpids);
-		fprintf(pFile, "Number of UDP ports processed:            %9d\n", udpports);
+		fprintf(pFile, "Number of PIDs processed:                              %9d\n", pids);
+		fprintf(pFile, "Number of PIDs processed at least two times:           %9d\n", pids2);
+		fprintf(pFile, "Number of PIDs with at least one PCR processed:        %9d\n", pcrpids);
+		fprintf(pFile, "Number of PIDs with at least two PCR processed:        %9d\n", pcrpids2);
+		fprintf(pFile, "Number of UDP ports processed:                         %9d\n", udpports);
 		fclose (pFile);
 		
 		time_end = gettimeofday();

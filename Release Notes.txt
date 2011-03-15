@@ -1,0 +1,5 @@
+PCAPAnalyzer Release Notes
+--------------------------
+Features Added:
+ -The number of PIDs with\without PCR which were processed at least two times is now written in the Statistics file.
+ -The PIDs without PCR which were processed at least two times are now shown in the PID-Bitrate file.
