@@ -1,8 +1,5 @@
 PCAPAnalyzer Release Notes
 --------------------------
-BETA 7:
+BETA 8:
 	Features Added:
-	 -The number of PIDs with\without PCR which were processed at least twice is now written in the Statistics file.
-	 -The number of PIDs with\without PCR which were processed at least twice in two distinct packets is now written in the Statistics file.
-	 -The PIDs with\without PCR which were processed at least twice are now shown in the PID-Bitrate\PCR-Offset file.
-	 -The PIDs with\without PCR which were processed at least twice in two distinct packets are now shown in the PID-Bitrate\PCR-Offset file.
+	 -RTP Packet skip
